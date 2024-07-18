@@ -58,7 +58,7 @@ regd_users.post("/login", (req, res) => {
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
     const isbn = req.params.isbn;
-    const review = req.body.review;
+    const review = req.query.review;
     const username = req.session.authorization.username;
 
     // Check if the book exists
@@ -72,6 +72,24 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
             // Add a new review
             books[isbn].reviews[username] = review;
             return res.status(200).json({ message: "Review successfully added." });
+        }
+    } else {
+        return res.status(404).json({ message: "Book not found." });
+    }
+});
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+    const isbn = req.params.isbn;
+    const username = req.session.authorization.username;
+
+    // Check if the book exists
+    if (books[isbn]) {
+        // Check if the user has posted a review
+        if (books[isbn].reviews[username]) {
+            // Delete the user's review
+            delete books[isbn].reviews[username];
+            return res.status(200).json({ message: "Review successfully deleted." });
+        } else {
+            return res.status(404).json({ message: "Review not found for this user." });
         }
     } else {
         return res.status(404).json({ message: "Book not found." });
